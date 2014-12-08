@@ -9,23 +9,23 @@ window.onload = function() {
 	var rows, columns, tblArray;
 
 	// Assign actions to menu buttons
-	document.getElementById("menu_new").addEventListener("click", CreateNew);
-	document.getElementById("menu_open").addEventListener("click", OpenExisting);
-	document.getElementById("menu_save").addEventListener("click", SaveCurrent);
+	document.getElementById("menu_new").addEventListener("click", createNew);
+	document.getElementById("menu_open").addEventListener("click", openExisting);
+	document.getElementById("menu_save").addEventListener("click", saveCurrent);
 
 
-	function CreateNew() {
-		setTableSize(10, 10);
+	function createNew() {
+		setTableSize(20, 58);
 		createBlankArray();	
 		createScreenTable();
 		
 	}
 	
-	function OpenExisting() {
+	function openExisting() {
 		alert("Open - not implemented yet");
 	} 
 	
-	function SaveCurrent() {
+	function saveCurrent() {
 		alert("Save - not implemented yet");
 	}
 
@@ -48,7 +48,7 @@ window.onload = function() {
 		function createHTML()  {
 			isHeader = that.row == 0 || that.col == 0;
 			cellElement = document.createElement(isHeader ? "th" : "td");
-			cellElement.setAttribute("id", "" + letter(that.row) + that.col);
+			cellElement.setAttribute("id", "" + numberToLetters(that.col) + that.row);
 			if(!isHeader && this.eventHandler) {
 				cellElement.addEventListener("blur", function() {
 					setValue(that.eventHandler(inputElement.value));
@@ -99,9 +99,8 @@ window.onload = function() {
 		// Data rows
 		for (nRow=1; nRow <= rows; nRow++) {
 			var dataRow = document.createElement("tr");
-			var rowLetter = letter(nRow);
-			dataRow.setAttribute("id", rowLetter);
-			dataRow.appendChild(new Cell(nRow, 0, rowLetter, null).elemHTML);
+			dataRow.setAttribute("id", "" + nRow);
+			dataRow.appendChild(new Cell(nRow, 0, nRow, null).elemHTML);
 			for (nCol=1; nCol <= columns; nCol++) {
 				dataRow.appendChild(tblArray[nRow][nCol].elemHTML);
 			}
@@ -120,7 +119,7 @@ window.onload = function() {
 		headerRow.appendChild(new Cell(0, 0, "*", null).elemHTML);
 		
 		for(var nCol=1; nCol <= columns; nCol++) {
-			headerRow.appendChild(new Cell(0, nCol, ""+nCol, null).elemHTML);
+			headerRow.appendChild(new Cell(0, nCol, numberToLetters(nCol), null).elemHTML);
 		}
 		
 		return headerRow;
@@ -129,6 +128,23 @@ window.onload = function() {
 	function letter(nNum) {
 		var a = "A".charCodeAt(0);
 		return String.fromCharCode(a + nNum - 1);
+	}
+	
+	function numberToLetters(nNum) {
+		var result;
+		if (nNum <= 26) {
+			result = letter(nNum);
+		} else {
+			var modulo = nNum % 26;
+			var quotient = Math.floor(nNum / 26);
+			if (modulo === 0) {
+				result = letter(quotient - 1) + letter(26);
+			} else {
+				result = letter(quotient) + letter(modulo);
+			}
+		}
+		
+		return result;
 	}
 	
 	function cellProcessor() {
