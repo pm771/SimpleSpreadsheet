@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="ISO-8859-1">
-<title>Simple Spreadsheet</title>
+	<meta charset="ISO-8859-1">
+	<title>Simple Spreadsheet</title>
 </head>
 <body>
-	<table id="mainTable" >
-	</table>
+	<div id="header">
+		<input type="button" id="menu_new" value="New" class="MenuButton" title="Create a new spreadsheet"/>
+		<input type="button" id="menu_open" value="Open" class="MenuButton" title="Open a saved spreadsheet"/>
+		<input type="button" id="menu_save" value="Save" class="MenuButton" title="Save your spreadsheet"/>
+	</div>
+	
+	<div id="table_container">
+	</div>
+	
+	<!-- JS Scripts -->
+	<script type="text/javascript" src="js/main.js"></script>
+	
 </body>
 </html>
