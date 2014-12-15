@@ -11,6 +11,7 @@ function main() {
 	
 	var rows, columns, tblArray;
 	var a = "A".charCodeAt(0);
+	var startRow, startCol;
 	
 
 	window.onload = function() {
@@ -24,10 +25,11 @@ function main() {
 	}	
 
 	function createNew() {
+		startRow = 1;
+		startCol = 1.
 		setTableSize(20, 58);
 		createBlankArray();	
 		createScreenTable();
-		
 	}
 	
 	function openExisting() {
@@ -43,20 +45,24 @@ function main() {
 		columns = nCols;
 	}
 	
-	function Cell(nRow, nCol, value, cellHandler) {
+	function Cell(nRow, nCol, value, cellHandler, autoFocus) {
 		
-		var inputElement, cellElement, isHeader, parentTable, that = this;
+		var inputElement, cellElement, isHeader, that = this, cellEvaluator = cellHandler;
 		
 		this.row = nRow;
 		this.col = nCol;
 		this.value = value || "";
-		this.eventHandler = cellHandler;
+		// this.eventHandler = cellHandler;
 		this.elemHTML = createHTML();
-		this.inputElement = inputElement;
+		// this.inputElement = inputElement;
 		
-		this.setValue = function(value) {
-			this.value = value;
-			this.inputElement.value = value;
+		this.setFocus = function() {
+			inputElement.focus();
+		}
+		
+		function setValue(newValue) {
+			that.value = newValue;
+			inputElement.value = newValue;
 		}
 		
 		function createHTML()  {
@@ -69,34 +75,86 @@ function main() {
 			inputElement.setAttribute("type", "text");
 			inputElement.value = that.value;
 			if (isHeader) {
+				var headerClass = that.col == 0 ? "ColumnHeader"  : "RowHeader";
 				inputElement.setAttribute("disabled", true);
-				inputElement.setAttribute("class", "HeaderCell");
+				inputElement.setAttribute("class", "HeaderCell " + headerClass);
 			} else {
 				inputElement.setAttribute("class", "DataCell");
-				if(that.eventHandler) {
-					inputElement.addEventListener("blur", 
-						function() {
-							that.setValue(that.eventHandler(inputElement.value));
-
-						}, 
-						true);
+				if(cellEvaluator) {
+					inputElement.addEventListener("blur", cellEval, true);
 				}	
 			}
 			
+			inputElement.addEventListener("keydown", keyAction);
+			inputElement.autofocus = autoFocus;
+			
 			cellElement.appendChild(inputElement);
 			return cellElement;
+			
+			function cellEval() {
+				setValue(cellEvaluator(inputElement.value));
+			}
+			
+			function keyAction (event) {
+				var e = event || window.event;
+
+				switch(e.keyCode || e.which ) {
+				case 37:
+					// left key pressed
+					moveTo(0, -1);
+					break;
+				case 38:
+					// up key pressed
+					moveTo(-1, 0);
+					break;
+				case 39:
+					// right key pressed
+					moveTo(0, 1);
+					break;
+				case 40:
+					// down key pressed
+					moveTo(1, 0);
+					break;  
+				case 13:
+					// Enter key pressed
+					moveTo();
+					break;
+				default: return;  // for all other keys
+				} 
+						
+				event.preventDefault();  // to prevent scrolling
+			}
+			
+			function moveTo(rowMove, colMove) {
+			
+				var newRow = that.row + rowMove;
+				var newCol = that.col + colMove;
+				
+				cellEval();
+				
+				if( (rowMove || colMove)  && 
+					 newRow > 0 && newCol > 0 &&	
+					 newRow <= rows && newCol <= columns) {
+					// real move to another cell
+					tblArray[newRow][newCol].setFocus();
+				} else {			
+					that.setFocus();
+					// that.inputElement.scrollIntoView();
+				}
+			}
 		}
 		
-
 	}
 	
 	function createBlankArray() {
 		var nRow, nCol	// variables for loops
+		var autoFocus;
 		tblArray = [];
 		for (nRow=1; nRow<=rows; nRow++) {
 			tblArray[nRow] = [];
 			for (nCol=1; nCol<=columns; nCol++) {
-				tblArray[nRow][nCol] = new Cell(nRow, nCol, "", cellProcessor); 
+				autoFocus = ( nRow === startRow && nCol === startCol );  
+				tblArray[nRow][nCol] = new Cell(nRow, nCol, "", cellProcessor, autoFocus); 
 			}			
 		}				
 	}
